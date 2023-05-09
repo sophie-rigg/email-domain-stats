@@ -8,6 +8,35 @@ files with 10 million lines or run on a small machine.
 Write this package as you normally would for any production grade code that would be deployed to a live system.
 
 Please stick to using the standard library.
- */
+*/
 
 package emaildomainstats
+
+import (
+	"emaildomainstats/reader/csv"
+)
+
+type client struct {
+	filepath      string
+	columnHeaders []string
+	columnNumbers []int
+	delimeter     *rune
+}
+
+// ProcessCSVFile processes a csv file and returns a map of email domains and the number of customers for each domain.
+func ProcessCSVFile(filePath string, options ...Option) (map[string]int, error) {
+	c := &client{
+		filepath: filePath,
+	}
+
+	for _, option := range options {
+		option(c)
+	}
+
+	r, err := csv.NewReader(c.filepath, c.columnNumbers, c.columnHeaders, c.delimeter)
+	if err != nil {
+		return nil, err
+	}
+
+	return r.Read()
+}
